@@ -8,6 +8,127 @@
 
 AI Agent 正在从"辅助工具"演变为"自主执行者"，但随之而来的安全事故频发（数据删除、数据泄露、自主攻击等）。本项目的目标是：**给 AI Agent 套上缰绳，让 AI 可控、可信、可用。**
 
+## 核心功能
+
+- **执行监控**：实时监控 Agent 执行过程，记录执行历史和日志
+- **安全护栏**：检测和阻止危险操作，防止安全事故发生
+- **人类干预**：对高风险操作进行人类审核，确保安全执行
+- **执行历史**：完整记录执行过程，支持审计和分析
+- **安全违规**：记录和分析安全违规行为，持续改进安全策略
+
+## 技术架构
+
+### 模块结构
+- **agenkit/core/**：核心模块
+  - **sdk.py**：HITL SDK 主类
+  - **monitor.py**：执行监控模块
+  - **guardrail.py**：安全护栏模块
+  - **human_in_the_loop.py**：人类干预模块
+- **agenkit/examples/**：使用示例
+- **agenkit/tests/**：测试套件
+
+### 技术栈
+- **语言**：Python 3.7+
+- **依赖**：无外部依赖
+- **扩展性**：模块化设计，易于集成和扩展
+
+## 安装方法
+
+### 从源码安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/chatabc/AgenGit.git
+cd AgenGit
+
+# 安装包
+pip install -e .
+
+# 安装开发依赖（可选）
+pip install -e "[dev]"
+```
+
+## 快速开始
+
+### 基本使用
+
+```python
+from agenkit import HITLSDK
+
+# 创建一个简单的Agent类
+class SimpleAgent:
+    def __init__(self, name):
+        self.name = name
+    
+    def execute(self, task, context=None):
+        """执行任务"""
+        print(f"Agent {self.name} executing task: {task}")
+        return f"Result for task: {task}"
+
+# 初始化HITL SDK
+config = {
+    'monitor': {
+        'max_history': 100
+    },
+    'safety': {
+        'forbidden_commands': ['rm -rf', 'delete', 'shutdown'],
+        'max_output_length': 1000
+    },
+    'human_in_the_loop': {
+        'require_intervention_for': ['file_write', 'system_command'],
+        'always_require_intervention': ['delete', 'rm -rf']
+    }
+}
+
+sdk = HITLSDK(config)
+
+# 创建Agent实例
+agent = SimpleAgent("test-agent")
+
+# 执行任务
+result = sdk.execute_agent(agent, "Read configuration file")
+print(result)
+
+# 查看执行历史
+history = sdk.get_execution_history()
+print(history)
+
+# 查看安全违规记录
+violations = sdk.get_safety_violations()
+print(violations)
+```
+
+### 安全规则配置
+
+```python
+# 自定义安全规则
+config = {
+    'safety': {
+        'forbidden_commands': ['rm -rf', 'delete', 'shutdown'],
+        'forbidden_patterns': [
+            r'[0-9]{16}',  # 信用卡号
+            r'[0-9]{9,12}',  # 社会安全号
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # 邮箱
+        ],
+        'max_output_length': 10000,
+        'max_execution_time': 300  # 5分钟
+    }
+}
+```
+
+### 人类干预配置
+
+```python
+# 自定义人类干预规则
+config = {
+    'human_in_the_loop': {
+        'require_intervention_for': ['file_write', 'file_delete', 'network_request'],
+        'auto_approve_patterns': ['read', 'get', 'list', 'view'],
+        'always_require_intervention': ['delete', 'destroy', 'format']
+    }
+}
+```
+
 ## 文档目录
 
 ### 📄 [AI Agent 安全事故汇编](docs/AI_Agent_安全事故汇编.docx)
@@ -38,7 +159,7 @@ Harness Engineering 核心概念与技术体系调研，包括：
 - 逐项详细分析
 - 推荐执行路径："SDK 入口，平台变现"
 
-## 推荐执行路径
+## 执行路线图
 
 ```
 Phase 1 (2-4周)  → 开源 HITL SDK（入口，获取开发者认知）
@@ -55,3 +176,20 @@ Phase 4 (16-24周) → 事故学习自动化 + 中文市场本地化
 - Anthropic - Effective Harnesses for Long-Running Agents (2026.02)
 - CSA - The Agentic Trust Framework: Zero Trust Governance for AI Agents (2026.02)
 - McKinsey - Trust in the Age of Agents (2026)
+
+## 贡献指南
+
+我们欢迎社区贡献，包括：
+- 代码贡献：修复 bug、添加新功能
+- 文档完善：更新文档、添加示例
+- 安全规则：提供新的安全规则和检测方法
+- 集成测试：与其他 Agent 框架的集成
+
+## 许可证
+
+MIT License
+
+## 联系方式
+
+- 项目地址：https://github.com/chatabc/AgenGit
+- 团队邮箱：team@agengit.com
