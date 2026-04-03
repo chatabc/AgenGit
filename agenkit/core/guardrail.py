@@ -88,6 +88,15 @@ class SafetyGuard:
         # 记录日志
         print(f"[SECURITY VIOLATION] {violation_type}: {reason}")
         
+        # 尝试保存到数据库
+        try:
+            from .db import DatabaseManager
+            db = DatabaseManager()
+            db.insert_violation(violation)
+        except Exception as e:
+            # 数据库保存失败时不影响正常流程
+            print(f"[DATABASE ERROR] Failed to save violation: {e}")
+        
         return violation
     
     def _trim_violations(self):
